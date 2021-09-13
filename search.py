@@ -19,6 +19,31 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+class Node:
+	parent = None
+	state = []
+
+	def __init__(self,parent):
+		self.parent = parent
+
+	def setState(self,state):
+		self.state = state
+
+	def getState(self):
+		return self.state
+
+	def getParent(self):
+		return self.parent	
+
+	def getCoordinates(self):
+		return self.state[0]
+
+	def getAction(self):
+		return self.state[1]
+
+	def getCost(self):
+		return self.state[2]
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -81,18 +106,74 @@ def depthFirstSearch(problem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
+	"""
+    #print "Start:", problem.getStartState()
+    #print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    #print "Start's successors:", problem.getSuccessors(problem.getStartState())
 
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stack = util.Stack()
+    start = Node(None)
+    start.setState((problem.getStartState(),None,0))
+    stack.push(start)
+
+    explored = util.Counter()
+
+    while(True):
+    	if stack.isEmpty():
+    		return "ERROR"
+    	else:
+    		n = stack.pop()
+    		if (problem.isGoalState(n.getCoordinates())):
+    			return getNodePath(n)
+    		successors = problem.getSuccessors(n.getCoordinates())
+
+    		for s in successors:
+    			node = Node(n)
+    			node.setState(s)
+    			print(node.getState())
+    			if node.getCoordinates() not in explored:
+    				stack.push(node)
+    				explored[node.getCoordinates()] = True
+
+
+
+def getNodePath(node):
+	path = []
+
+	while(True):
+		print(node.getState())
+		print(node.getAction())
+		if node.getAction() == None:
+			path.reverse()
+			return path
+		path.append(node.getAction())
+		node = node.parent
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    q = util.Queue()
+    start = Node(None)
+    start.setState((problem.getStartState(),None,0))
+    q.push(start)
+
+    explored = util.Counter()
+
+    while(True):
+    	if q.isEmpty():
+    		return "ERROR"
+    	else:
+    		n = q.pop()
+    		if (problem.isGoalState(n.getCoordinates())):
+    			return getNodePath(n)
+    		successors = problem.getSuccessors(n.getCoordinates())
+
+    		for s in successors:
+    			node = Node(n)
+    			node.setState(s)
+    			print(node.getState())
+    			if node.getCoordinates() not in explored:
+    				q.push(node)
+    				explored[node.getCoordinates()] = True
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
