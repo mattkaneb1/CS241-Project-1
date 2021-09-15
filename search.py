@@ -22,6 +22,7 @@ import util
 class Node:
 	parent = None
 	state = []
+        pathCost = 0
 
 	def __init__(self,parent):
 		self.parent = parent
@@ -29,8 +30,11 @@ class Node:
 	def setState(self,state):
 		self.state = state
 
+        def setPathCost(self, parentPC):
+                self.pathCost = parentPC + self.state[2]
+                
 	def getState(self):
-		return self.state
+                return self.state
 
 	def getParent(self):
 		return self.parent	
@@ -44,6 +48,10 @@ class Node:
 	def getCost(self):
 		return self.state[2]
 
+        def getPathCost(self):
+                return self.pathCost
+        
+                
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -125,24 +133,24 @@ def depthFirstSearch(problem):
     		n = stack.pop()
     		if (problem.isGoalState(n.getCoordinates())):
     			return getNodePath(n)
-    		successors = problem.getSuccessors(n.getCoordinates())
 
-    		for s in successors:
-    			node = Node(n)
-    			node.setState(s)
-    			print(node.getState())
-    			if node.getCoordinates() not in explored:
+                if n.getCoordinates() not in explored:
+
+                        explored[n.getCoordinates()] = True
+    		        successors = problem.getSuccessors(n.getCoordinates())
+                
+    		        for s in successors:
+    			        node = Node(n)
+    			        node.setState(s)
     				stack.push(node)
-    				explored[node.getCoordinates()] = True
-
 
 
 def getNodePath(node):
 	path = []
 
 	while(True):
-		print(node.getState())
-		print(node.getAction())
+		#print(node.getState())
+		#print(node.getAction())
 		if node.getAction() == None:
 			path.reverse()
 			return path
@@ -157,7 +165,7 @@ def breadthFirstSearch(problem):
     q.push(start)
 
     explored = util.Counter()
-
+    
     while(True):
     	if q.isEmpty():
     		return "ERROR"
@@ -165,20 +173,47 @@ def breadthFirstSearch(problem):
     		n = q.pop()
     		if (problem.isGoalState(n.getCoordinates())):
     			return getNodePath(n)
-    		successors = problem.getSuccessors(n.getCoordinates())
 
-    		for s in successors:
-    			node = Node(n)
-    			node.setState(s)
-    			print(node.getState())
-    			if node.getCoordinates() not in explored:
+                if n.getCoordinates() not in explored:
+
+                        explored[n.getCoordinates()] = True
+    		        successors = problem.getSuccessors(n.getCoordinates())
+                
+    		        for s in successors:
+    			        node = Node(n)
+    			        node.setState(s)
     				q.push(node)
-    				explored[node.getCoordinates()] = True
 
+                                
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    q = util.PriorityQueue()
+    start = Node(None)
+    start.setState((problem.getStartState(),None,0))
+    q.push(start, 0)
+
+    explored = util.Counter()
+    
+    while(True):
+    	if q.isEmpty():
+    		return "ERROR"
+    	else:
+    		n = q.pop()                
+    		if (problem.isGoalState(n.getCoordinates())):
+    			return getNodePath(n)
+
+                if n.getCoordinates() not in explored:
+
+                        explored[n.getCoordinates()] = True 
+    		        successors = problem.getSuccessors(n.getCoordinates())
+
+    		        for s in successors:
+    			        node = Node(n)
+    			        node.setState(s)
+                                node.setPathCost(n.getPathCost())
+                               	q.push(node, node.getPathCost())
+                                
 
 def nullHeuristic(state, problem=None):
     """
@@ -189,8 +224,31 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    q = util.PriorityQueue()
+    start = Node(None)
+    start.setState((problem.getStartState(),None,0))
+    q.push(start, heuristic(start.getCoordinates(), problem))
+
+    explored = util.Counter()
+
+    while(True):
+    	if q.isEmpty():
+    		return "ERROR"
+    	else:
+    		n = q.pop()
+    		if (problem.isGoalState(n.getCoordinates())):
+                        return getNodePath(n)
+
+                if n.getCoordinates() not in explored:
+                        explored[n.getCoordinates()] = True 
+    		        successors = problem.getSuccessors(n.getCoordinates())
+                
+    		        for s in successors:
+    			        node = Node(n)
+    			        node.setState(s)
+                                node.setPathCost(n.getPathCost())
+    				q.push(node, node.getPathCost()+heuristic(node.getCoordinates(),problem))
 
 
 # Abbreviations
