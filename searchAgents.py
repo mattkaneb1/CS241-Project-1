@@ -293,15 +293,13 @@ class CornersProblem(search.SearchProblem):
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition,(1,1,1,1))
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return sum(state[1]) == 0
 
     def getSuccessors(self, state):
         """
@@ -318,12 +316,35 @@ class CornersProblem(search.SearchProblem):
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
+            
+            currentPosition = state[0]
+            x,y = currentPosition
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
 
-            "*** YOUR CODE HERE ***"
+            if not self.walls[nextx][nexty]:
+                
+                nextPosition = (nextx, nexty)
+                
+                cornerStatus = state[1]
+                
+                if (nextPosition == self.corners[0]):
+                    nextCornersStatus = (0,cornerStatus[1],cornerStatus[2],cornerStatus[3])
+                elif (nextPosition == self.corners[1]):
+                    nextCornersStatus = (cornerStatus[0],0,cornerStatus[2],cornerStatus[3])
+                elif (nextPosition == self.corners[2]):
+                    nextCornersStatus = (cornerStatus[0],cornerStatus[1],0,cornerStatus[3])
+                elif (nextPosition == self.corners[3]):
+                    nextCornersStatus = (cornerStatus[0],cornerStatus[1],cornerStatus[2],0)
+                else:
+                    nextCornersStatus = cornerStatus
+ 
+                # REVISIT COST !!!!!!!!
+                cost = 1
+
+                stateInfo = (nextPosition,nextCornersStatus)
+
+                successors.append( ( stateInfo, action, cost) )
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -358,8 +379,56 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    # Approach 1 (1908 nodes explored)
+    #return sum(state[1]) 1908 nodes explored
+
+
+    # Approach 2 (1653 nodes explored)
+    """
+    dist = [0,0,0,0]
+    position = state[0]
+    for c in range(len(corners)):
+        corner = corners[c]
+        xy1 = position
+        xy2 = corner
+        manhattan = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        euclidean = ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
+        dist[c] = max(manhattan,euclidean)
+    return min(dist)
+    """
+    
+    # Approach 3 (485 nodes explored)
+    position = state[0]
+    distance = 0 
+    if state[1][0] == 1:
+        xy1 = position
+        xy2 = corners[0]
+        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        position = corners[0]
+
+    if state[1][1] == 1:
+        xy1 = position
+        xy2 = corners[1]
+        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        position = corners[1]
+
+    if state[1][2] == 1:
+        xy1 = position
+        xy2 = corners[2]
+        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        position = corners[2]
+
+    if state[1][3] == 1:
+        xy1 = position
+        xy2 = corners[3]
+        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        position = corners[3]
+
+    return distance
+
+    #return 0 # Trivial 
+
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
