@@ -379,54 +379,17 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    # Approach 1 (1908 nodes explored)
-    #return sum(state[1]) 1908 nodes explored
-
-
-    # Approach 2 (1653 nodes explored)
-    """
     dist = [0,0,0,0]
     position = state[0]
     for c in range(len(corners)):
-        corner = corners[c]
-        xy1 = position
-        xy2 = corner
-        manhattan = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-        euclidean = ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
-        dist[c] = max(manhattan,euclidean)
-    return min(dist)
-    """
-    
-    # Approach 3 (485 nodes explored)
-    position = state[0]
-    distance = 0 
-    if state[1][0] == 1:
-        xy1 = position
-        xy2 = corners[0]
-        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-        position = corners[0]
-
-    if state[1][1] == 1:
-        xy1 = position
-        xy2 = corners[1]
-        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-        position = corners[1]
-
-    if state[1][2] == 1:
-        xy1 = position
-        xy2 = corners[2]
-        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-        position = corners[2]
-
-    if state[1][3] == 1:
-        xy1 = position
-        xy2 = corners[3]
-        distance += abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-        position = corners[3]
-
-    return distance
-
-    #return 0 # Trivial 
+        if state[1][c] == 1:
+            corner = corners[c]
+            xy1 = position
+            xy2 = corner
+            manhattan = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+            euclidean = ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
+            dist[c] = max(manhattan,euclidean)
+    return max(dist)
 
 
 
@@ -451,6 +414,15 @@ class FoodSearchProblem:
         self.startingGameState = startingGameState
         self._expanded = 0 # DO NOT CHANGE
         self.heuristicInfo = {} # A dictionary for the heuristic to store information
+        self.findFood(startingGameState)
+     
+    def findFood(self,startingGameState):
+        self.heuristicInfo["food"] = []
+        height, width = self.walls.height-2, self.walls.width-2
+        for x in range(width):
+            for y in range(height):
+                if startingGameState.hasFood(x,y):
+                    self.heuristicInfo["food"].append((x,y))
 
     def getStartState(self):
         return self.start
@@ -521,8 +493,12 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    
+    print(problem.heuristicInfo["food"])
+
+    return sum([x == "T" for x in foodGrid])
+
+    #return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
