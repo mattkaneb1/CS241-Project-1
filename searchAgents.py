@@ -382,22 +382,44 @@ def cornersHeuristic(state, problem):
     # Approach 1 (1908 nodes explored)
     #return sum(state[1]) 1908 nodes explored
 
-
     # Approach 2 (1653 nodes explored)
+
+    # Addition to Approach 2 (1475 nodes explored)
     """
     dist = [0,0,0,0]
     position = state[0]
+
+    if sum(state[1]) == 0:
+        return 0
+        
     for c in range(len(corners)):
-        corner = corners[c]
-        xy1 = position
-        xy2 = corner
-        manhattan = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
-        euclidean = ( (xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2 ) ** 0.5
-        dist[c] = max(manhattan,euclidean)
+        if state[1][c] == 0:
+            dist[c] = 9999
+        else:
+            corner = corners[c]
+            manhattan = util.manhattanDistance(position, corner)
+            dist[c] = manhattan
+
     return min(dist)
     """
+
+    # Approach 4 (1136 nodes explored) 
     
+    dist = [0,0,0,0]
+    position = state[0]
+
+    for c in range(len(corners)):
+
+        if state[1][c] == 1:
+            corner = corners[c]
+            manhattan = util.manhattanDistance(position, corner)
+            dist[c] = manhattan
+
+    return max(dist)
+    
+
     # Approach 3 (485 nodes explored)
+    """
     position = state[0]
     distance = 0 
     if state[1][0] == 1:
@@ -425,7 +447,7 @@ def cornersHeuristic(state, problem):
         position = corners[3]
 
     return distance
-
+    """
     #return 0 # Trivial 
 
 
